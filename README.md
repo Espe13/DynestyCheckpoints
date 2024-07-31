@@ -11,7 +11,7 @@ To integrate the checkpointing functionality, follow these steps:
 1. **Replace Files:**
    - Copy the provided `fitting.py` and `nested.py` files into the `prospect` directory within your Python 3.10 environment. The path should be similar to `python3.10/site-packages/prospect/fitting/`.
 
-2. **Modify prospect.fitting.fit_model():**
+2. **How to modify prospect.fitting.fit_model():**
    - The `fitting.py` file includes a function called `run_dynesty_sampler` which has been adapted to incorporate a checkpoint file name (`hfile`).
    - When using Prospector, ensure you add a name for the `hfile` to separate different checkpoint files for different runs. Here is an example of how the fitting code might look:
 
@@ -23,7 +23,7 @@ To integrate the checkpointing functionality, follow these steps:
 
    - If no name is provided, the output will automatically be called `noname_dynesty_init_checkpoint_file.pkl`.
 
-3. **Modify `nested.py`:**
+3. **Modifications in `nested.py`:**
    - The `nested.py` file contains another version of the `run_dynesty_sampler` function that includes checkpointing functionality.
    - You can change the default names for the checkpoint files for both initial and dynamic sampling within this function.
    - Additionally, you can modify the checkpoint intervals. The default interval is set to create a checkpoint every 60 seconds.
@@ -47,7 +47,7 @@ To change the checkpoint intervals, modify the interval setting in `nested.py`:
 checkpoint_interval = 60  # in seconds, adjust as needed
 ```
 
-## Conclusion
+## Summary
 
 By following these steps, you can implement checkpointing in your Prospector sampling process using Dynesty. This implementation provides flexibility in naming and interval settings to suit your specific requirements. While this guide is tailored to a particular setup, it offers a framework that you can adapt for your own projects.
 
