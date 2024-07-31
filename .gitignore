@@ -1,0 +1,8 @@
+
+.DS_Store
+*.pyc 
+*.txt
+*.h5
+*.pdf
+*.pkl
+*.png
