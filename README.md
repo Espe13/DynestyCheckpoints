@@ -21,7 +21,7 @@ To integrate the checkpointing functionality, follow these steps:
     output = fit_model(obs, model, sps, noise, hfile=hame, **run_params)
     ```
 
-   - If no name is provided, the output will automatically be called `noname_init_checkpoint_file.pkl`.
+   - If no name is provided, the output will automatically be called `noname_dynesty_init_checkpoint_file.pkl`.
 
 3. **Modify `nested.py`:**
    - The `nested.py` file contains another version of the `run_dynesty_sampler` function that includes checkpointing functionality.
