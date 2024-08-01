@@ -416,7 +416,7 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
 
             sample_params_dyn = {'resume': resume_dyn}
 
-            if not resume_init:
+            if not resume_dyn:
                 sample_params_dyn.update({
                     'nlive_new': nested_nlive_batch,
                     'logl_bounds': logl_bounds,
