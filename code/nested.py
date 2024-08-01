@@ -274,16 +274,22 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
     dynamic_checkpoint_file = hfile + dynamic_checkpoint_name
 
     print(init_checkpoint_file, dynamic_checkpoint_file)
+
+
     # Check if dynamic checkpoint file exists and load state
     if os.path.exists(dynamic_checkpoint_file):
-        print('____initial sampling executed, directly start with dynamic sampling____')
+        print('\n____initial sampling complete, directly proceeding with dynamic sampling____\n')
         dsampler = dynesty.DynamicNestedSampler.restore(dynamic_checkpoint_file)
+        resume_init = False
+        resume_dyn = True
         
     else:
         # Check if initial checkpoint file exists and load state
         if os.path.exists(init_checkpoint_file):
-            print('____found checkpoint file for initial sampling, restore____')
+            print('\n____checkpoint file for initial sampling found, restoring state____\n')
             dsampler = dynesty.DynamicNestedSampler.restore(init_checkpoint_file)
+            resume_init = True
+            resume_dyn = False
         else:
             # Instantiate sampler
             dsampler = dynesty.DynamicNestedSampler(lnprobfn, prior_transform, ndim,
@@ -294,30 +300,41 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
                                                     update_interval=nested_update_interval,
                                                     pool=pool, queue_size=queue_size, use_pool=use_pool
                                                     )
+            resume_init = False
+            resume_dyn = False
+#______________________________________________INITIAL SAMPLING__________________________________________________________________________
 
-    # Generator for initial nested sampling
+       # Generator for initial nested sampling
     if not os.path.exists(dynamic_checkpoint_file):
         ncall = dsampler.ncall
         niter = dsampler.it - 1
         tstart = time.time()
         last_checkpoint_time = tstart
 
-        for results in dsampler.sample_initial(nlive=nested_nlive_init,
-                                               dlogz=nested_dlogz_init,
-                                               maxcall=nested_maxcall_init,
-                                               maxiter=nested_maxiter_init,
-                                               live_points=nested_live_points):
+        sample_params = {'resume': resume_init}
+
+        if not resume_init:
+            sample_params.update({
+                'nlive': nested_nlive_init,
+                'dlogz': nested_dlogz_init,
+                'maxcall': nested_maxcall_init,
+                'maxiter': nested_maxiter_init,
+                'live_points': nested_live_points
+            })
+
+        # Sample initial points
+        for results in dsampler.sample_initial(**sample_params):
 
             try:
                 # dynesty >= 2.0
                 (worst, ustar, vstar, loglstar, logvol,
-                 logwt, logz, logzvar, h, nc, worst_it,
-                 propidx, propiter, eff, delta_logz, blob) = results
-            except(ValueError):
+                logwt, logz, logzvar, h, nc, worst_it,
+                propidx, propiter, eff, delta_logz, blob) = results
+            except ValueError:
                 # dynesty < 2.0
                 (worst, ustar, vstar, loglstar, logvol,
-                 logwt, logz, logzvar, h, nc, worst_it,
-                 propidx, propiter, eff, delta_logz) = results
+                logwt, logz, logzvar, h, nc, worst_it,
+                propidx, propiter, eff, delta_logz) = results
 
             if delta_logz > 1e6:
                 delta_logz = np.inf
@@ -328,17 +345,18 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
                 with np.errstate(invalid='ignore'):
                     logzerr = np.sqrt(logzvar)
                 sys.stderr.write("\riter: {:d} | batch: {:d} | nc: {:d} | "
-                                 "ncall: {:d} | eff(%): {:6.3f} | "
-                                 "logz: {:6.3f} +/- {:6.3f} | "
-                                 "dlogz: {:6.3f} > {:6.3f}    "
-                                 .format(niter, 0, nc, ncall, eff, logz,
-                                         logzerr, delta_logz, nested_dlogz_init))
+                                "ncall: {:d} | eff(%): {:6.3f} | "
+                                "logz: {:6.3f} +/- {:6.3f} | "
+                                "dlogz: {:6.3f} > {:6.3f}    "
+                                .format(niter, 0, nc, ncall, eff, logz,
+                                        logzerr, delta_logz, nested_dlogz_init))
                 sys.stderr.flush()
 
             # Checkpointing
             current_time = time.time()
             if current_time - last_checkpoint_time > checkpoint_interval:
                 dsampler.save(init_checkpoint_file)
+                print(f'\ncheckpoint saved at {init_checkpoint_file}')
                 last_checkpoint_time = current_time
 
         ndur = time.time() - tstart
@@ -346,7 +364,10 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
             print('\ndone dynesty (initial) in {0}s'.format(ndur))
 
         # Save initial checkpoint as dynamic checkpoint to start dynamic sampling from there
-        dsampler.save(dynamic_checkpoint_file)
+        dsampler.save(init_checkpoint_file)
+        print(f'\nlast initial checkpoint saved at {init_checkpoint_file}')
+
+#______________________________________________DYNAMIC SAMPLING__________________________________________________________________________
 
     if nested_maxcall is None:
         nested_maxcall = sys.maxsize
@@ -358,8 +379,11 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
         nested_maxiter = sys.maxsize
     if nested_maxiter_batch is None:
         nested_maxiter_batch = sys.maxsize
-
+    #print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAA NCALL', ncall, dsampler.ncall)
+    #print('AAAAAAAAAAAAAAAAAAAAAAAAAAAAA NITER', niter, dsampler.it, dsampler.it - 1)
     # Generator for dynamic sampling
+    ncall = dsampler.ncall
+    niter = dsampler.it - 1
     tstart = time.time()
     last_checkpoint_time = tstart
 
@@ -389,11 +413,19 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
             # weight function.
             logl_bounds = wt_function(res, nested_weight_kwargs)
             lnz, lnzerr = res.logz[-1], res.logzerr[-1]
-            for results in dsampler.sample_batch(nlive_new=nested_nlive_batch,
-                                                 logl_bounds=logl_bounds,
-                                                 maxiter=miter,
-                                                 maxcall=mcall,
-                                                 save_bounds=nested_save_bounds):
+
+            sample_params_dyn = {'resume': resume_dyn}
+
+            if not resume_init:
+                sample_params_dyn.update({
+                    'nlive_new': nested_nlive_batch,
+                    'logl_bounds': logl_bounds,
+                    'maxiter': miter,
+                    'maxcall': mcall,
+                    'save_bounds': nested_save_bounds,
+                })
+
+            for results in dsampler.sample_batch(**sample_params_dyn):
 
                 try:
                     # dynesty >= 2.0
@@ -423,6 +455,7 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
                 current_time = time.time()
                 if current_time - last_checkpoint_time > checkpoint_interval:
                     dsampler.save(dynamic_checkpoint_file)
+                    print(f'\ncheckpoint saved at {dynamic_checkpoint_file}')
                     last_checkpoint_time = current_time
 
             dsampler.combine_runs()
