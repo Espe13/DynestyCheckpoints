@@ -50,14 +50,14 @@ To change the checkpoint intervals, modify the interval settings in `nested.py`:
 ```python
 checkpoint_interval = 60  # in seconds, adjust as needed
 ```
-
+colors = ['darkviolet', 'dodgerblue', 'forestgreen', 'orange', 'coral']
 ## Evaluation
 
-To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run standard_1, standard_2), to two runs conducted with our code, check_interrupted and check_uninterrupted. In the following figure, we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs. The interrupted run was interrupted multiple times in the initial and the batch phase.
+To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run <span style="color:orange">standard_1</span>, <span style="color:coral">standard_2</span>), to two runs conducted with our code, <span style="color:forestgreen">check_interrupted</span> and <span style="color:darkviolet">check_uninterrupted</span>. In the following figure, we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs. The interrupted run was interrupted multiple times in the initial and the batch phase.
 
 ![thetas](./img/thetas.png)
 
-A comparison for the posteriors can be found here in figure [cornerplot](img/cornerplot.png). The standard runs are shown in red and yellow, the uninterrupted run that was producing checkpoints along the way is shown in violet, and the interrupted run in green.
+A comparison for the posteriors can be found here in figure [cornerplot](img/cornerplot.png). The standard runs are shown in  <span style="color:coral">red</span> and <span style="color:orange">orange</span>, the uninterrupted run that was producing checkpoints along the way is shown in <span style="color:darkviolet">violet</span>, and the interrupted run in  <span style="color:forestgreen">green</span>.
 
 ![cornerplot](./img/cornerplot.png)
 
