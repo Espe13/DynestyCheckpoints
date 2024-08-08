@@ -34,7 +34,7 @@ def run_nestle_sampler(lnprobfn, model, verbose=True,
 
 def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
                         verbose=True,
-                        hfile = 'test',
+                        hfile = 'noname',
                         checkpoint_name='_dynesty_checkpoint.save',
                         checkpoint_interval=60,
                         # sampler kwargs
