@@ -18,7 +18,7 @@ To integrate the checkpointing functionality, follow these steps:
     ```python
       hfile   =   os.path.join(args.path_output, hfile_name)
       hame = hfile.rstrip(".h5")
-      output  =   fit_model(obs, model, sps, noise, hfile = hame, **run_params)
+      output  =   prospect.fitting.fit_model(obs, model, sps, noise, hfile = hame, **run_params)
 
       dynesty_file = hame + '_dynesty_checkpoint.save'
 
@@ -28,7 +28,7 @@ To integrate the checkpointing functionality, follow these steps:
       else:
          print(f"File {dynesty_file} does not exist.")
 
-      writer.write_hdf5(hfile, run_params, model, obs,
+      prospect.io.write_results.write_hdf5(hfile, run_params, model, obs,
                         output["sampling"][0], output["optimization"][0],
                         tsample=output["sampling"][1],
                         toptimize=output["optimization"][1])
