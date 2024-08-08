@@ -9,9 +9,9 @@ This repository provides a guide on how to integrate checkpointing into your Pro
 To integrate the checkpointing functionality, follow these steps:
 
 1. **Replace Files:**
-   - Copy the provided `fitting.py` and `nested.py` files into the `prospect` directory within your Python 3.10 environment. The path should be similar to `python3.10/site-packages/prospect/fitting/`.
+   - Copy the provided `fitting.py` and `nested.py` files into the `prospect` directory within your Python 3.10 environment. The path should be similar to `python3.10/site-packages/prospect/fitting/xxx.py`.
 
-2. **How to modify prospect.fitting.fit_model():**
+2. **How to modify `prospect.fitting.fit_model()`:**
    - The `fitting.py` file includes a function called `run_dynesty_sampler` which has been adapted to incorporate a checkpoint file name (`hfile`).
    - When using Prospector, ensure you add a name for the `hfile` to separate different checkpoint files for different runs. Here is an example of how the fitting code might look:
 
@@ -21,11 +21,11 @@ To integrate the checkpointing functionality, follow these steps:
     output = fit_model(obs, model, sps, noise, hfile=hame, **run_params)
     ```
 
-   - If no name is provided, the output will automatically be called `noname_dynesty_init_checkpoint_file.pkl`.
+   - If no name is provided, the output will automatically be called `noname_dynesty_checkpoint_file.pkl`.
 
 3. **Modifications in `nested.py`:**
    - The `nested.py` file contains another version of the `run_dynesty_sampler` function that includes checkpointing functionality.
-   - You can change the default names for the checkpoint files for both initial and dynamic sampling within this function.
+   - You can change the default names for the checkpoint files within this function.
    - Additionally, you can modify the checkpoint intervals. The default interval is set to create a checkpoint every 60 seconds.
 
 ## Customization
@@ -35,29 +35,38 @@ To integrate the checkpointing functionality, follow these steps:
 To customize the naming convention of your checkpoint files, adjust the relevant lines in `nested.py`:
 
 ```python
-initial_checkpoint_file = 'custom_initial_checkpoint_file.pkl'
-dynamic_checkpoint_file = 'custom_dynamic_checkpoint_file.pkl'
+dynesty_checkpoint_file = 'your_chosen_name.pkl'
+```
+resulting in the output:
+
+```python
+filename = 'hfile_name' + 'your_chosen_name.pkl'
 ```
 
-### Checkpoint Intervals
+### Checkpoint File Naming
 
-To change the checkpoint intervals, modify the interval setting in `nested.py`:
+To change the checkpoint intervals, modify the interval settings in `nested.py`:
 
 ```python
 checkpoint_interval = 60  # in seconds, adjust as needed
 ```
 
+## Evaluation
+
+To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run standard_1, standard_2), to two runs conducted with our code, check_interrupted and check_uninterrupted. In the following figure, we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs. The interrupted run was interrupted multiple times in the initial and the batch phase.
+
+![thetas](./img/thetas.png)
+
+A comparison for the posteriors can be found here in figure [cornerplot](img/cornerplot.png). The standard runs are shown in red and yellow, the uninterrupted run that was producing checkpoints along the way is shown in violet, and the interrupted run in green.
+
+![cornerplot](./img/cornerplot.png)
+
+
+
 ## Summary
 
 By following these steps, you can implement checkpointing in your Prospector sampling process using Dynesty. This implementation provides flexibility in naming and interval settings to suit your specific requirements. While this guide is tailored to a particular setup, it offers a framework that you can adapt for your own projects.
 
-For any further customization or troubleshooting, refer to the provided `environment.yml` file and the Prospector and Dynesty documentation.
+For any further customization or troubleshooting, refer to the provided `environment.yml` file and the Prospector and Dynesty documentation, or email me: [aas208@cam.ac.uk](mailto:aas208@cam.ac.uk).
 
 
-
-## Comparison
-
-To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run standard_1, standard_2), to two runs conducted with our code, check_interrupted and check_uninterrupted. In the following figure [thetas](img/thetas.png), we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs.
-
-
-![thetas](./img/thetas.png)
