@@ -57,7 +57,7 @@ For any further customization or troubleshooting, refer to the provided `environ
 
 ## Comparison
 
-To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run standard_1, standard_2), to two runs conducted with our code, check_interrupted and check_uninterrupted. In the following figure [thetas](img/thetas.pdf), we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs.
+To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run standard_1, standard_2), to two runs conducted with our code, check_interrupted and check_uninterrupted. In the following figure [thetas](img/thetas.png), we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs.
 
 
-![thetas](./img/thetas.pdf)
+![thetas](./img/thetas.png)
