@@ -50,7 +50,6 @@ To change the checkpoint intervals, modify the interval settings in `nested.py`:
 ```python
 checkpoint_interval = 60  # in seconds, adjust as needed
 ```
-colors = ['darkviolet', 'dodgerblue', 'forestgreen', 'orange', 'coral']
 ## Evaluation
 
 To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run <span style="color:orange">standard_1</span>, <span style="color:coral">standard_2</span>), to two runs conducted with our code, <span style="color:forestgreen">check_interrupted</span> and <span style="color:darkviolet">check_uninterrupted</span>. In the following figure, we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs. The interrupted run was interrupted multiple times in the initial and the batch phase.
