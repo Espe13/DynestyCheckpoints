@@ -68,6 +68,67 @@ To change the checkpoint intervals, modify the interval settings in `nested.py`:
 ```python
 checkpoint_interval = 60  # in seconds, adjust as needed
 ```
+
+
+### Log Output
+
+It is also advaisable to replace the save_sampler function in `dynesty.utils` file with the following function, to print out details about the saving process additionally to the log information from `prosepctor`:
+
+```python
+
+def save_sampler(sampler, fname):
+    """
+    Save the state of the dynamic sampler in a file
+
+    Parameters
+    ----------
+    sampler: object
+        Dynamic or Static nested sampler
+    fname: string
+        Filename of the save file.
+
+    """
+    format_version = 1
+    D = {
+        'sampler': sampler,
+        'version': DYNESTY_VERSION,
+        'format_version': format_version
+    }
+    tmp_fname = fname + '.tmp'
+    
+    # Check if the directory exists
+    directory = os.path.dirname(fname)
+    if not os.path.exists(directory):
+        print(f"Directory {directory} does not exist. Attempting to create it.")
+        try:
+            os.makedirs(directory)
+            print(f"Directory {directory} created successfully.")
+        except Exception as e:
+            print(f"Failed to create directory {directory}. Error: {e}")
+            return
+    
+    # Check write permissions for the directory
+    if os.access(directory, os.W_OK):
+        print(f"Write access to directory {directory} is granted.")
+    else:
+        print(f"Write access to directory {directory} is denied.")
+        return
+
+    try:
+        with open(tmp_fname, 'wb') as fp:
+            pickle_module.dump(D, fp)
+        os.rename(tmp_fname, fname)
+        print(f"Sampler state saved successfully to {fname}.")
+    except Exception as e:  # catch and log the specific exception
+        print(f"Exception occurred while saving: {e}")
+        try:
+            os.unlink(tmp_fname)
+        except Exception as cleanup_exception:  # log cleanup exception
+            print(f"Cleanup exception occurred: {cleanup_exception}")
+        raise
+
+```
+
 ## Evaluation
 
 To evaluate how well the interrupted sampling works, we compare two uninterrupted runs, executed with the nested file originally provided by Prospector (run <span style="color:orange">standard_1</span>, <span style="color:coral">standard_2</span>), to two runs conducted with our code, <span style="color:forestgreen">check_interrupted</span> and <span style="color:darkviolet">check_uninterrupted</span>. In the following figure, we compare the outcomes for the different parameters. As can be seen, none of the runs stands out as always being different from the others. The runs executed with the standard code do not show more similarities than the other two runs. The interrupted run was interrupted multiple times in the initial and the batch phase.
