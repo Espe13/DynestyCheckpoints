@@ -16,9 +16,27 @@ To integrate the checkpointing functionality, follow these steps:
    - When using Prospector, ensure you add a name for the `hfile` to separate different checkpoint files for different runs. Here is an example of how the fitting code might look:
 
     ```python
-    hfile = os.path.join(args.path_output, hfile_name)
-    hame = hfile.rstrip(".h5") + '_'
-    output = fit_model(obs, model, sps, noise, hfile=hame, **run_params)
+      hfile   =   os.path.join(args.path_output, hfile_name)
+      hame = hfile.rstrip(".h5")
+      output  =   fit_model(obs, model, sps, noise, hfile = hame, **run_params)
+
+      dynesty_file = hame + '_dynesty_checkpoint.save'
+
+      if os.path.exists(dynesty_file):
+         os.remove(dynesty_file)
+         print(f"File {dynesty_file} has been deleted.")
+      else:
+         print(f"File {dynesty_file} does not exist.")
+
+      writer.write_hdf5(hfile, run_params, model, obs,
+                        output["sampling"][0], output["optimization"][0],
+                        tsample=output["sampling"][1],
+                        toptimize=output["optimization"][1])
+
+      try:
+         hfile.close()
+      except(AttributeError):
+         pass
     ```
 
    - If no name is provided, the output will automatically be called `noname_dynesty_checkpoint_file.pkl`.
