@@ -3,6 +3,5 @@
 *.pyc 
 *.txt
 *.h5
-*.pdf
 *.pkl
-*.png
+
