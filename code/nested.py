@@ -152,8 +152,7 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
     print(dsampler.results.summary())
 
     return dsampler.results
-
-    
+   
 
 
 def run_dynesty_sampler_umsteadnlich(lnprobfn, prior_transform, ndim,
