@@ -76,7 +76,16 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
     # Check if checkpoint file exists and load state or initialize sampler
     if os.path.isfile(checkpoint_file):
         print('\n____checkpoint file found, restoring state____\n')
-        dsampler = dynesty.DynamicNestedSampler.restore(checkpoint_file, pool=pool)
+        dsampler = dynesty.DynamicNestedSampler.restore(lnprobfn, prior_transform, ndim,
+                                               checkpoint_file = checkpoint_file,
+                                               bound=nested_bound,
+                                               sample=nested_sample,
+                                               walks=nested_walks,
+                                               bootstrap=nested_bootstrap,
+                                               first_update=nested_first_update,
+                                               update_interval=nested_update_interval,
+                                               pool=pool, queue_size=queue_size, use_pool=False
+                                               )
     else:
         print('\n____no checkpoint file found, initializing new sampler____\n')
         dsampler = dynesty.DynamicNestedSampler(lnprobfn, prior_transform, ndim,
@@ -86,22 +95,10 @@ def run_dynesty_sampler(lnprobfn, prior_transform, ndim,
                                                bootstrap=nested_bootstrap,
                                                first_update=nested_first_update,
                                                update_interval=nested_update_interval,
-                                               pool=pool, queue_size=queue_size, use_pool=use_pool
+                                               pool=pool, queue_size=queue_size, use_pool=False
                                                )
     
     # Generator for nested sampling____________________________________________________
-    '''
-    attributes = dir(dsampler)
-
-    # Filter out built-in attributes (those starting and ending with '__')
-    custom_attributes = [attr for attr in attributes if not attr.startswith('__')]
-
-    # Print custom attributes
-    for attr in custom_attributes:
-        value = getattr(dsampler, attr, None)
-        print(f"{attr}: {value}")
-    '''
-
 
 
     if os.path.isfile(checkpoint_file):
